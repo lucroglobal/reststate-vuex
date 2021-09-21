@@ -17,7 +17,8 @@
     "docs:build": "vuepress build docs"
   },
   "dependencies": {
-    "@reststate/client": "^0.0.8",
+    "@reststate/client": "^0.0.9",
+    "vue-template-compiler": "2.6.11",
     "yarn": "^1.22.11"
   },
   "peerDependencies": {
@@ -40,7 +41,7 @@
     "node-forge": "^0.10.0",
     "prettier": "2.1.2",
     "serialize-javascript": "^5.0.1",
-    "vue": "2.6.11",
+    "vue": "2.6.14",
     "vue-server-renderer": "2.6.11",
     "vuepress": "^1.0.1",
     "vuex": "^3.6.2"
