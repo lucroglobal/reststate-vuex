@@ -2039,10 +2039,17 @@ describe('resourceModule()', function () {
     };
 
     describe('success', () => {
+      const expectedResponseData = {
+        type: 'widget',
+        id: '42',
+        attributes: {
+          title: 'Bar',
+          created: '2021-01-30', // add an attribute as though the server did
+        },
+      };
+
       beforeEach(() => {
-        // returned data not used right now
-        // probably need to in case server chagnes the values
-        api.patch.mockResolvedValue({ data: {} });
+        api.patch.mockResolvedValue({ data: expectedResponseData });
 
         store.commit('REPLACE_ALL_RECORDS', [
           {
@@ -2073,6 +2080,8 @@ describe('resourceModule()', function () {
         expect(records.length).toEqual(1);
         const firstRecord = records[0];
         expect(firstRecord.attributes.title).toEqual('Bar');
+        // server added attribute now in store
+        expect(firstRecord.attributes.created).toEqual('2021-01-30');
       });
 
       it('updates related to-one records', () => {
@@ -2097,7 +2106,7 @@ describe('resourceModule()', function () {
         api.get.mockResolvedValue({
           data: {
             data: [dish],
-            included: [oldRestaurant],
+            included: [newRestaurant],
           },
         });
         const modules = mapResourceModules({
@@ -2107,6 +2116,8 @@ describe('resourceModule()', function () {
         const multiStore = new Vuex.Store({
           modules,
         });
+        // put old records in store
+        multiStore.commit('dishes/REPLACE_ALL_RECORDS', [dish]);
         multiStore.commit('restaurants/REPLACE_ALL_RECORDS', [
           oldRestaurant,
           newRestaurant,
@@ -2121,11 +2132,10 @@ describe('resourceModule()', function () {
           },
         };
 
+        api.patch.mockResolvedValue({ data: dishWithUpdatedRelationship });
+
         return multiStore
-          .dispatch('dishes/loadById', { id: '1' })
-          .then(() =>
-            multiStore.dispatch('dishes/update', dishWithUpdatedRelationship),
-          )
+          .dispatch('dishes/update', dishWithUpdatedRelationship)
           .then(() => {
             const records = multiStore.getters['restaurants/related']({
               parent: dish,
@@ -2158,12 +2168,6 @@ describe('resourceModule()', function () {
           },
         };
 
-        api.get.mockResolvedValue({
-          data: {
-            data: [restaurant],
-            included: [keepDish, oldDish],
-          },
-        });
         const modules = mapResourceModules({
           names: ['restaurants', 'dishes'],
           httpClient: api,
@@ -2186,14 +2190,12 @@ describe('resourceModule()', function () {
           },
         };
 
+        api.patch.mockResolvedValue({
+          data: restaurantWithUpdatedRelationship,
+        });
+
         return multiStore
-          .dispatch('restaurants/loadById', { id: '1' })
-          .then(
-            multiStore.dispatch(
-              'restaurants/update',
-              restaurantWithUpdatedRelationship,
-            ),
-          )
+          .dispatch('restaurants/update', restaurantWithUpdatedRelationship)
           .then(() => {
             const records = multiStore.getters['dishes/related']({
               parent: restaurant,
