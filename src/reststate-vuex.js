@@ -319,7 +319,7 @@ const resourceModule = ({ name: resourceName, httpClient }) => {
       },
 
       update({ commit, dispatch, getters }, record) {
-        return client.update(record).then(() => {
+        return client.update(record).then(response => {
           const oldRecord = getters.byId({ id: record.id });
 
           // remove old relationships first
@@ -343,6 +343,10 @@ const resourceModule = ({ name: resourceName, httpClient }) => {
             }
           }
 
+          if (response.id) {
+            // if provided, use the payload from the server to update the store
+            record = response;
+          }
           // save entity
           commit('STORE_RECORD', record);
 
@@ -415,7 +419,10 @@ const resourceModule = ({ name: resourceName, httpClient }) => {
       hasNext: state => !!state.links.next,
       all: state => state.records,
       lastCreated: state => state.lastCreated,
-      byId: state => ({ id }) => state.records.find(r => r.id == id),
+      byId:
+        state =>
+          ({ id }) =>
+            state.records.find(r => r.id == id),
       lastMeta: state => state.lastMeta,
       page: state =>
         state.page.map(id => state.records.find(record => record.id === id)),

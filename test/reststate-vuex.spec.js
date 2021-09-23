@@ -1,6 +1,7 @@
+import { mapResourceModules, resourceModule } from '../src/reststate-vuex';
+
 import Vue from 'vue';
 import Vuex from 'vuex';
-import { resourceModule, mapResourceModules } from '../src/reststate-vuex';
 
 Vue.use(Vuex);
 
@@ -435,8 +436,7 @@ describe('resourceModule()', function () {
             data: {
               data: firstPage,
               links: {
-                next:
-                  'https://api.example.com/widgets?page[number]=2&page[size]=2',
+                next: 'https://api.example.com/widgets?page[number]=2&page[size]=2',
               },
             },
           });
@@ -461,8 +461,7 @@ describe('resourceModule()', function () {
               data: {
                 data: firstPage,
                 links: {
-                  next:
-                    'https://api.example.com/widgets?page[number]=2&page[size]=2',
+                  next: 'https://api.example.com/widgets?page[number]=2&page[size]=2',
                 },
                 meta,
               },
@@ -553,8 +552,7 @@ describe('resourceModule()', function () {
               data: {
                 data: firstPage,
                 links: {
-                  next:
-                    'https://api.example.com/widgets?page[number]=2&page[size]=2',
+                  next: 'https://api.example.com/widgets?page[number]=2&page[size]=2',
                 },
               },
             })
@@ -562,8 +560,7 @@ describe('resourceModule()', function () {
               data: {
                 data: secondPage,
                 links: {
-                  prev:
-                    'https://api.example.com/widgets?page[number]=1&page[size]=2',
+                  prev: 'https://api.example.com/widgets?page[number]=1&page[size]=2',
                 },
                 meta,
               },
@@ -619,8 +616,7 @@ describe('resourceModule()', function () {
               data: {
                 data: secondPage,
                 links: {
-                  prev:
-                    'https://api.example.com/widgets?page[number]=1&page[size]=2',
+                  prev: 'https://api.example.com/widgets?page[number]=1&page[size]=2',
                 },
               },
             })
@@ -628,8 +624,7 @@ describe('resourceModule()', function () {
               data: {
                 data: firstPage,
                 links: {
-                  next:
-                    'https://api.example.com/widgets?page[number]=2&page[size]=2',
+                  next: 'https://api.example.com/widgets?page[number]=2&page[size]=2',
                 },
                 meta,
               },
@@ -717,8 +712,7 @@ describe('resourceModule()', function () {
               data: {
                 data: firstPage,
                 links: {
-                  next:
-                    'https://api.example.com/widgets?page[number]=2&page[size]=2',
+                  next: 'https://api.example.com/widgets?page[number]=2&page[size]=2',
                 },
               },
             })
@@ -726,8 +720,7 @@ describe('resourceModule()', function () {
               data: {
                 data: secondPage,
                 links: {
-                  prev:
-                    'https://api.example.com/widgets?page[number]=1&page[size]=2',
+                  prev: 'https://api.example.com/widgets?page[number]=1&page[size]=2',
                 },
               },
             })
@@ -735,8 +728,7 @@ describe('resourceModule()', function () {
               data: {
                 data: firstPage,
                 links: {
-                  next:
-                    'https://api.example.com/widgets?page[number]=2&page[size]=2',
+                  next: 'https://api.example.com/widgets?page[number]=2&page[size]=2',
                 },
               },
             });
@@ -1267,10 +1259,12 @@ describe('resourceModule()', function () {
     });
 
     describe('included', () => {
+      let sharedData = {};
+
       describe('to many', () => {
         function sharedExamples() {
           it('makes the primary records accessible via getter', () => {
-            const records = this.multiStore.getters['restaurants/all'];
+            const records = sharedData.multiStore.getters['restaurants/all'];
 
             expect(records.length).toEqual(2);
 
@@ -1280,7 +1274,7 @@ describe('resourceModule()', function () {
           });
 
           it('makes the included records accessible via getter', () => {
-            const records = this.multiStore.getters['dishes/all'];
+            const records = sharedData.multiStore.getters['dishes/all'];
 
             expect(records.length).toEqual(3);
 
@@ -1290,8 +1284,8 @@ describe('resourceModule()', function () {
           });
 
           it('makes the included records accessible via relationship', () => {
-            const parent = this.primaryRecords[1];
-            const records = this.multiStore.getters['dishes/related']({
+            const parent = sharedData.primaryRecords[1];
+            const records = sharedData.multiStore.getters['dishes/related']({
               parent,
             });
 
@@ -1303,7 +1297,7 @@ describe('resourceModule()', function () {
 
           it('allows including records multiple levels deep', () => {
             const parent = { type: 'dishes', id: '1' };
-            const records = this.multiStore.getters['comments/related']({
+            const records = sharedData.multiStore.getters['comments/related']({
               parent,
             });
 
@@ -1315,7 +1309,7 @@ describe('resourceModule()', function () {
         }
 
         beforeEach(() => {
-          this.primaryRecords = [
+          sharedData.primaryRecords = [
             {
               type: 'restaurants',
               id: '1',
@@ -1356,7 +1350,7 @@ describe('resourceModule()', function () {
             },
           ];
 
-          this.includedRecords = [
+          sharedData.includedRecords = [
             {
               type: 'dishes',
               id: '1',
@@ -1397,69 +1391,72 @@ describe('resourceModule()', function () {
             },
           ];
 
-          this.response = {
-            data: this.primaryRecords,
-            included: this.includedRecords,
+          sharedData.response = {
+            data: sharedData.primaryRecords,
+            included: sharedData.includedRecords,
           };
 
           api.get.mockResolvedValue({
-            data: this.response,
+            data: sharedData.response,
           });
 
           const modules = mapResourceModules({
             names: ['restaurants', 'dishes', 'comments'],
             httpClient: api,
           });
-          this.multiStore = new Vuex.Store({
+          sharedData.multiStore = new Vuex.Store({
             modules,
           });
         });
 
         describe('loadAll', () => {
           beforeEach(() => {
-            return this.multiStore.dispatch('restaurants/loadAll', {
+            return sharedData.multiStore.dispatch('restaurants/loadAll', {
               include: 'dishes,dishes.comments',
             });
           });
 
-          sharedExamples.bind(this)();
+          sharedExamples();
         });
 
         describe('loadPage', () => {
           beforeEach(() => {
-            return this.multiStore.dispatch('restaurants/loadPage', {
+            return sharedData.multiStore.dispatch('restaurants/loadPage', {
               include: 'dishes,dishes.comments',
             });
           });
 
-          sharedExamples.bind(this)();
+          sharedExamples();
         });
 
         describe('loadNextPage', () => {
           beforeEach(() => {
-            return this.multiStore.dispatch('restaurants/loadNextPage', {
+            return sharedData.multiStore.dispatch('restaurants/loadNextPage', {
               include: 'dishes,dishes.comments',
             });
           });
 
-          sharedExamples.bind(this)();
+          sharedExamples();
         });
 
         describe('loadPreviousPage', () => {
           beforeEach(() => {
-            return this.multiStore.dispatch('restaurants/loadPreviousPage', {
-              include: 'dishes,dishes.comments',
-            });
+            return sharedData.multiStore.dispatch(
+              'restaurants/loadPreviousPage',
+              {
+                include: 'dishes,dishes.comments',
+              },
+            );
           });
 
-          sharedExamples.bind(this)();
+          sharedExamples();
         });
       });
 
       describe('to one', () => {
         function sharedExamples() {
           it('makes the primary records accessible via getter', () => {
-            const records = this.multiStore.getters['dishes/all'];
+            const records = sharedData.multiStore.getters['dishes/all'];
 
             expect(records.length).toEqual(2);
 
@@ -1469,7 +1466,7 @@ describe('resourceModule()', function () {
           });
 
           it('makes the included records accessible via getter', () => {
-            const records = this.multiStore.getters['restaurants/all'];
+            const records = sharedData.multiStore.getters['restaurants/all'];
 
             expect(records.length).toEqual(2);
 
@@ -1479,11 +1476,13 @@ describe('resourceModule()', function () {
           });
 
           it('makes the included records accessible via relationship', () => {
-            const parent = this.primaryRecords[0];
-            const record = this.multiStore.getters['restaurants/related']({
-              parent,
-              relationship: 'restaurant',
-            });
+            const parent = sharedData.primaryRecords[0];
+            const record = sharedData.multiStore.getters['restaurants/related'](
+              {
+                parent,
+                relationship: 'restaurant',
+              },
+            );
 
             expect(record.id).toEqual('1');
             expect(record.attributes.name).toEqual('Sushi Place');
@@ -1491,7 +1490,7 @@ describe('resourceModule()', function () {
         }
 
         beforeEach(() => {
-          this.primaryRecords = [
+          sharedData.primaryRecords = [
             {
               type: 'dishes',
               id: '1',
@@ -1524,7 +1523,7 @@ describe('resourceModule()', function () {
             },
           ];
 
-          this.includedRecords = [
+          sharedData.includedRecords = [
             {
               type: 'restaurants',
               id: '1',
@@ -1541,62 +1540,62 @@ describe('resourceModule()', function () {
             },
           ];
 
-          this.response = {
-            data: this.primaryRecords,
-            included: this.includedRecords,
+          sharedData.response = {
+            data: sharedData.primaryRecords,
+            included: sharedData.includedRecords,
           };
 
           api.get.mockResolvedValue({
-            data: this.response,
+            data: sharedData.response,
           });
 
           const modules = mapResourceModules({
             names: ['restaurants', 'dishes'],
             httpClient: api,
           });
-          this.multiStore = new Vuex.Store({
+          sharedData.multiStore = new Vuex.Store({
             modules,
           });
         });
 
         describe('loadAll', () => {
           beforeEach(() => {
-            return this.multiStore.dispatch('dishes/loadAll', {
+            return sharedData.multiStore.dispatch('dishes/loadAll', {
               include: 'restaurant',
             });
           });
 
-          sharedExamples.bind(this)();
+          sharedExamples();
         });
 
         describe('loadPage', () => {
           beforeEach(() => {
-            return this.multiStore.dispatch('dishes/loadPage', {
+            return sharedData.multiStore.dispatch('dishes/loadPage', {
               include: 'restaurant',
             });
           });
 
-          sharedExamples.bind(this)();
+          sharedExamples();
         });
 
         describe('loadNextPage', () => {
           beforeEach(() => {
-            return this.multiStore.dispatch('dishes/loadNextPage', {
+            return sharedData.multiStore.dispatch('dishes/loadNextPage', {
               include: 'restaurant',
             });
           });
 
-          sharedExamples.bind(this)();
+          sharedExamples();
         });
 
         describe('loadPreviousPage', () => {
           beforeEach(() => {
-            return this.multiStore.dispatch('dishes/loadPreviousPage', {
+            return sharedData.multiStore.dispatch('dishes/loadPreviousPage', {
               include: 'restaurant',
             });
           });
 
-          sharedExamples.bind(this)();
+          sharedExamples();
         });
       });
 
@@ -2040,10 +2039,17 @@ describe('resourceModule()', function () {
     };
 
     describe('success', () => {
+      const expectedResponseData = {
+        type: 'widget',
+        id: '42',
+        attributes: {
+          title: 'Bar',
+          created: '2021-01-30', // add an attribute as though the server did
+        },
+      };
+
       beforeEach(() => {
-        // returned data not used right now
-        // probably need to in case server chagnes the values
-        api.patch.mockResolvedValue({ data: {} });
+        api.patch.mockResolvedValue({ data: expectedResponseData });
 
         store.commit('REPLACE_ALL_RECORDS', [
           {
@@ -2074,6 +2080,8 @@ describe('resourceModule()', function () {
         expect(records.length).toEqual(1);
         const firstRecord = records[0];
         expect(firstRecord.attributes.title).toEqual('Bar');
+        // server added attribute now in store
+        expect(firstRecord.attributes.created).toEqual('2021-01-30');
       });
 
       it('updates related to-one records', () => {
@@ -2098,7 +2106,7 @@ describe('resourceModule()', function () {
         api.get.mockResolvedValue({
           data: {
             data: [dish],
-            included: [oldRestaurant],
+            included: [newRestaurant],
           },
         });
         const modules = mapResourceModules({
@@ -2108,6 +2116,8 @@ describe('resourceModule()', function () {
         const multiStore = new Vuex.Store({
           modules,
         });
+        // put old records in store
+        multiStore.commit('dishes/REPLACE_ALL_RECORDS', [dish]);
         multiStore.commit('restaurants/REPLACE_ALL_RECORDS', [
           oldRestaurant,
           newRestaurant,
@@ -2122,11 +2132,10 @@ describe('resourceModule()', function () {
           },
         };
 
+        api.patch.mockResolvedValue({ data: dishWithUpdatedRelationship });
+
         return multiStore
-          .dispatch('dishes/loadById', { id: '1' })
-          .then(() =>
-            multiStore.dispatch('dishes/update', dishWithUpdatedRelationship),
-          )
+          .dispatch('dishes/update', dishWithUpdatedRelationship)
           .then(() => {
             const records = multiStore.getters['restaurants/related']({
               parent: dish,
@@ -2159,12 +2168,6 @@ describe('resourceModule()', function () {
           },
         };
 
-        api.get.mockResolvedValue({
-          data: {
-            data: [restaurant],
-            included: [keepDish, oldDish],
-          },
-        });
         const modules = mapResourceModules({
           names: ['restaurants', 'dishes'],
           httpClient: api,
@@ -2187,14 +2190,12 @@ describe('resourceModule()', function () {
           },
         };
 
+        api.patch.mockResolvedValue({
+          data: restaurantWithUpdatedRelationship,
+        });
+
         return multiStore
-          .dispatch('restaurants/loadById', { id: '1' })
-          .then(
-            multiStore.dispatch(
-              'restaurants/update',
-              restaurantWithUpdatedRelationship,
-            ),
-          )
+          .dispatch('restaurants/update', restaurantWithUpdatedRelationship)
           .then(() => {
             const records = multiStore.getters['dishes/related']({
               parent: restaurant,
