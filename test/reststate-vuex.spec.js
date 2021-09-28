@@ -2049,7 +2049,7 @@ describe('resourceModule()', function () {
       };
 
       beforeEach(() => {
-        api.patch.mockResolvedValue({ data: expectedResponseData });
+        api.patch.mockResolvedValue({ data: { data: expectedResponseData } });
 
         store.commit('REPLACE_ALL_RECORDS', [
           {

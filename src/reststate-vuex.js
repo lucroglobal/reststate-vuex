@@ -343,9 +343,9 @@ const resourceModule = ({ name: resourceName, httpClient }) => {
             }
           }
 
-          if (response.id) {
+          if (response && response.data) {
             // if provided, use the payload from the server to update the store
-            record = response;
+            record = response.data;
           }
           // save entity
           commit('STORE_RECORD', record);
