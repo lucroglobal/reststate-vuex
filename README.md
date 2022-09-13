@@ -1,3 +1,6 @@
+# THIS LIBRARY NO LONGER IN USE. 
+## See SAM-2938 for details
+
 # @lucro/vuex
 
 `@lucro/vuex` allows you to access data from a [JSON:API](http://jsonapi.org/) web service via [Vuex](https://vuex.vuejs.org/) stores. Because of JSON:API's strong conventions, in most cases all you should need to do is tell `@lucro/vuex` the base URL of your web service, and which resources to access, and you should be set. No manual web request juggling!
